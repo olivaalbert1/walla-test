@@ -1,6 +1,7 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-// 'https://es.beta.wallapop.com'
+import path from 'path';
+import timestamp from '../utils/timestamp'
 
 test.describe('Example test suite', () => {
 
@@ -60,17 +61,6 @@ test.describe('Example test suite', () => {
     // scroll to bottom
     await page.getByRole('button', { name: 'Guardar' }).scrollIntoViewIfNeeded();
 
-    // await page.getByText('Subir foto').click();
-    // const [fileChooser] = await Promise.all([
-    //   page.waitForEvent('filechooser'),
-    //   page.getByText('Seleccionar foto').click() // some button that triggers file selection
-    // ]);
-    // await fileChooser.setFiles('tests/fixtures/profile-pic.jpg');
-    // await page.waitForRequest(request => request.url().includes('/api/user') && request.method() === 'PUT');
-
-
-    // await page.getByRole('textbox', { name: 'Descripción' }).fill('Nueva descripción del perfil de prueba automatizada');
-
     await Promise.all([
       page.waitForRequest(request => request.url().includes('/api/v3/users/me/') && request.method() === 'POST'),
       page.getByRole('button', { name: 'Guardar' }).click()
@@ -78,9 +68,72 @@ test.describe('Example test suite', () => {
 
     await page.getByText('Identificación guardada').isVisible();
     await page.getByRole('button', { name: 'Entendido' }).click();
-    // or fill more data
-    // await page.getByRole('button', { name: 'Rellenar mis datos legales' }).click();
-    // await expect().toBeVisible();
+
     await expect(page.getByText('Tus datos se han editado')).toBeVisible();
   });
+
+  test('sell new item', async ({ page }) => {
+    let itemName = 'Iphone 8 ' + timestamp.year + timestamp.month + timestamp.day + timestamp.hour + timestamp.min + timestamp.sec
+    await page.getByRole('button', { name: 'Vender' }).click();
+    await page.getByRole('button', { name: 'Consumer Goods Vertical' }).click();
+    await page.getByRole('textbox', { name: 'Resumen del producto' }).click();
+    await page.getByRole('textbox', { name: 'Resumen del producto' }).fill(itemName);
+    await page.getByRole('button', { name: 'Continuar' }).click();
+
+    const fileChooserPromise = page.waitForEvent('filechooser');
+
+    await page.getByRole('button', { name: 'Subir fotos' }).click();
+    const fileChooser = await fileChooserPromise;
+    const filePath = path.join(__dirname, 'fixtures', 'profile-pic.jpg');
+    await fileChooser.setFiles(filePath);
+
+    await page.locator('#step-photo').getByRole('button', { name: 'Continuar' }).click();
+    await page.getByText('Categoría y subcategoría').click();
+    await page.getByLabel('Tecnología y electrónica').getByText('Tecnología y electrónica').click();
+    await page.getByText('Telefonía: móviles y').click();
+    await page.getByText('Smartphones').click();
+    await page.getByText('Color*').click();
+    await page.getByText('Blanco').click();
+    await page.getByText('Estado*').click();
+    await page.getByText('En condiciones aceptables').click();
+    await page.getByText('Precio').click();
+    await page.getByRole('textbox', { name: 'Precio' }).fill('50');
+    await page.locator('wallapop-toggle span').nth(2).click();
+
+    await page.getByText('Capacidad de almacenamiento*').click();
+    await page.getByRole('option', { name: '4 GB', exact: true }).locator('div').nth(1).click();
+
+    let response = await Promise.all([
+      page.waitForResponse(response => response.url().includes('/api/v3/items') && response.status() === 200),
+      page.getByRole('button', { name: 'Subir producto' }).click(),
+    ]);
+
+    // get the json response and extract the item id
+    let itemId = await response[0].json();
+
+    console.log('itemID = ' + itemId.id)
+
+    let url = 'https://api.beta.wallapop.com/api/v3/user/items'
+
+    let response2 = await page.waitForResponse(response =>
+      response.url() === url &&
+      response.status() === 200 &&
+      response.request().method() === 'GET')
+
+    let response2await = await response2.json()
+    console.log(response2await)
+
+    
+    await page.locator('tsl-subscription-awareness-modal').getByRole('button', { name: 'Ahora no, gracias' }).click();
+    await page.getByText('¡Yuhu! Producto subido').click();
+    await page.getByRole('button', { name: 'Ahora no, gracias' }).click();
+
+    // @ts-ignore
+    const itemFound = response2await.data.some(item => item.id === itemId.id);
+
+    // Then, we use a simple assertion to confirm the result.
+    expect(itemFound).toBe(true);
+
+  });
+
 });
