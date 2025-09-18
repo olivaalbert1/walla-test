@@ -13,6 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
+  timeout: 60 * 1000,
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -51,7 +52,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'],
       storageState: './auth/user.json' },
       testMatch: /.*(?<!\.setup)\.js/, // Exclude setup tests
-      dependencies: ['setup']
+      // dependencies: ['setup']
     },
 
     // {
