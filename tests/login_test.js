@@ -13,7 +13,6 @@ test.describe('Example test suite', () => {
     await page.close();
   });
 
-
   test('Search and filter bicycles', async ({ page }) => {
     await page.locator('#searchbox-form-input').click();
     await page.locator('#searchbox-form-input').fill('bicicleta niño de 8 años');
@@ -38,8 +37,25 @@ test.describe('Example test suite', () => {
 
     await page.waitForRequest(request => request.url().includes('app/4806.908231f8617bde81.js') && request.method() === 'GET');
 
-    await page.getByRole('textbox', { name: 'Nombre' }).fill('Nuevo Nombre');
-    await page.getByRole('textbox', { name: 'Apellidos' }).fill('Nuevo Apellido');
+    let name = 'Nombre' + timestamp.year + timestamp.month + timestamp.day + timestamp.hour + timestamp.min + timestamp.sec
+    let apellido = 'Apellidos' + timestamp.year + timestamp.month + timestamp.day + timestamp.hour + timestamp.min + timestamp.sec
+
+    await page.getByRole('textbox', { name: 'Nombre' }).fill('Nombre');
+    await page.getByRole('textbox', { name: 'Apellidos' }).fill('Apellido');
+
+    const fileChooserPromise = page.waitForEvent('filechooser');
+
+    if (await page.locator('label').filter({ hasText: 'Subir foto' }).isVisible()) {
+      await page.locator('label').filter({ hasText: 'Subir foto' }).click();
+    }
+
+    if (await page.locator('label').filter({ hasText: 'Cambiar foto' }).isVisible()) {
+      await page.locator('label').filter({ hasText: 'Cambiar foto' }).click()
+    }
+
+    const fileChooser = await fileChooserPromise;
+    const filePath = path.join(__dirname, 'fixtures', 'profile-pic.jpg');
+    await fileChooser.setFiles(filePath);
 
     if (await page.getByRole('radio', { name: 'Uso personal' }).isChecked()) {
       await page.getByRole('radio', { name: 'Uso profesional' }).check();
@@ -67,7 +83,7 @@ test.describe('Example test suite', () => {
     ]);
 
     await page.getByText('Identificación guardada').isVisible();
-    await page.getByRole('button', { name: 'Entendido' }).click();
+    // await page.getByRole('button', { name: 'Entendido' }).click();
 
     await expect(page.getByText('Tus datos se han editado')).toBeVisible();
   });
@@ -84,7 +100,7 @@ test.describe('Example test suite', () => {
 
     await page.getByRole('button', { name: 'Subir fotos' }).click();
     const fileChooser = await fileChooserPromise;
-    const filePath = path.join(__dirname, 'fixtures', 'profile-pic.jpg');
+    const filePath = path.join(__dirname, 'fixtures', 'iphone.png');
     await fileChooser.setFiles(filePath);
 
     await page.locator('#step-photo').getByRole('button', { name: 'Continuar' }).click();
@@ -123,7 +139,7 @@ test.describe('Example test suite', () => {
     let response2await = await response2.json()
     console.log(response2await)
 
-    
+
     await page.locator('tsl-subscription-awareness-modal').getByRole('button', { name: 'Ahora no, gracias' }).click();
     await page.getByText('¡Yuhu! Producto subido').click();
     await page.getByRole('button', { name: 'Ahora no, gracias' }).click();
