@@ -3,13 +3,11 @@ import { test, expect } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-const authFile = path.join(__dirname, '../auth/user.json'); // Path to save authentication state
+const authFile = path.join(__dirname, '../auth/user.json');
 
 
 test('write login session data', async ({ page }) => {
     await page.goto(process.env.BASEURL + '/login');
-
-    // await page.waitForLoadState('networkidle');
 
     await page.getByRole('button', { name: 'Aceptar todo' }).click();
     await page.getByRole('button', { name: 'Iniciar sesión' }).click();

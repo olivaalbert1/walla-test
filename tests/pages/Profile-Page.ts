@@ -8,9 +8,6 @@ export class ProfilePage {
 
     constructor(page: Page) {
         this.page = page;
-        // this.getList = page.locator('[id="favourite-apps"]');
-        // this.getMenu = page.locator('[role="menubar"]');
-        // this.pageTestId = page.getByTestId('page')
         this.waitForLoadState = page.waitForLoadState('load')
     }
 
@@ -56,18 +53,7 @@ export class ProfilePage {
         await this.page.locator('section').filter({ hasText: 'Tus productos se verán en:Este es el punto donde está ubicado tu perfil de' }).getByPlaceholder('Marca la localización').click();
         await this.page.getByRole('combobox', { name: 'Geolocation' }).fill(location);
         await this.page.getByRole('option', { name: 'Barcelona, Cataluña, ESP' }).click();
-        // await this.page.waitForResponse(response => response.url().includes('/design-system/') && response.status() === 200);
         await this.page.getByRole('button', { name: 'Aplicar' }).click();
-
-
-
-        // if (await this.page.getByRole('region', { name: 'Map' }).isVisible()) {
-        //     await this.page.getByRole('region', { name: 'Map' }).click();
-        //     await this.page.getByRole('combobox', { name: 'Geolocation' }).fill(location);
-        //     await this.page.getByRole('option', { name: 'Barcelona, Cataluña, ESP' }).click();
-        //     await this.page.waitForResponse(response => response.url().includes('/design-system/') && response.status() === 200);
-        //     await this.page.getByRole('button', { name: 'Aplicar' }).click();
-        // }
     }
 
     async saveChanges() {
@@ -75,7 +61,6 @@ export class ProfilePage {
         await this.page.getByRole('button', { name: 'Guardar' }).scrollIntoViewIfNeeded();
 
         let response = await Promise.all([
-            // this.page.waitForRequest(request => request.url().includes('/api/v3/users/me/') && request.method() === 'POST'),
             this.page.waitForResponse(response => response.url().includes('/api/v3/users/me/') && response.status() === 200 && response.request().method() === 'POST'),
             this.page.getByRole('button', { name: 'Guardar' }).click()
         ]);

@@ -7,9 +7,6 @@ export class SearchPage {
 
   constructor(page: Page) {
     this.page = page;
-    // this.getList = page.locator('[id="favourite-apps"]');
-    // this.getMenu = page.locator('[role="menubar"]');
-    // this.pageTestId = page.getByTestId('page')
     this.waitForLoadState = page.waitForLoadState('load')
   }
 
@@ -18,8 +15,6 @@ export class SearchPage {
   }
 
   async searchBox(searchWord: string) {
-    // await this.page.locator('#searchbox-form-input').click();
-
     let responseMessage = await Promise.all([
       this.page.locator('#searchbox-form-input').fill(searchWord),
       this.page.locator('#searchbox-form-input').press('Enter'),
@@ -41,7 +36,6 @@ export class SearchPage {
   }
 
   async clickOnFirstItem(itemFound: string) {
-    // await this.page.getByRole('link', { name: itemFound }).click();
     await this.page.getByRole('link', { name: itemFound }).first().click();
   }
 
