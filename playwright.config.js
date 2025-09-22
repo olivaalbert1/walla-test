@@ -52,7 +52,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'],
       storageState: './auth/user.json' },
       testMatch: /.*(?<!\.setup)\.js/, // Exclude setup tests
-      // dependencies: ['setup']
+      dependencies: ['setup']
     },
 
     // {
